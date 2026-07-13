@@ -1,6 +1,7 @@
 import json
 import os
 import yaml
+
 from dataclasses import dataclass
 
 
@@ -35,9 +36,11 @@ def open_config(path):
 		print("path doesn't exist")
 
 
-def load_config(path):
-	return BaseConfig(**open_config(path))
-
+def load_config(path, config_type="base"):
+	if config_type == "base":
+		return BaseConfig(**open_config(path))
+	if config_type == "model":
+		return ModelConfig(**open_config(path))
 
 def read_dialogue_history(path):
 	with open(path, 'r', encoding='utf-8') as f:
