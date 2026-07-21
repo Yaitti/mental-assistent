@@ -56,8 +56,4 @@ def load_config(path, config_type="base"):
 	if config_type == "model":
 		return ModelConfig(**open_config(path))
 
-def read_dialogue_history(path):
-	with open(path, 'r', encoding='utf-8') as f:
-		messages = json.load(f)
 
-	return  messages
