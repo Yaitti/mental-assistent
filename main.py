@@ -1,9 +1,24 @@
 import anthropic
 import argparse
 import json
+import logging
 import os
+import sys
 
 from src import load_config
+
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
+file_handler = logging.FileHandler(f'{__name__}.log', mode="w")
+console_handler = logging.StreamHandler(sys.stdout)
+formatter = logging.Formatter("%(name)s %(asctime)s %(levelname)s %(message)s")
+
+file_handler.setFormatter(formatter)
+console_handler.setFormatter(formatter)
+logger.addHandler(file_handler)
+logger.addHandler(console_handler)
 
 
 class MemorableModel:
@@ -19,21 +34,26 @@ class MemorableModel:
 
     def read_dialogue(self):
         if os.path.exists(self.config.dialogue_path):
-            print("dialogue_path --- exists")
-            with open(self.config.dialogue_path, 'r', encoding="utf-8") as f:
-                dialogue = json.load(f)
-                return dialogue
+            logger.info("Dialogue exists")
+            try:
+                with open(self.config.dialogue_path, 'r', encoding="utf-8") as f:
+                    dialogue = json.load(f)
+                    logger.info("Dialogue successfully opened")
+                    return dialogue
+            except:
+                logger.error("Incorrect dialogue file")
         else:
+            logger.info("Dialogue doesn't exist or Incorrect path")
             return []
 
     def make_response(self):
-        message = self.client.messages.create(
+        """message = self.client.messages.create(
             model=self.model_config.model,
             max_tokens=self.model_config.max_tokens,
             messages=self.messages
         )
-
-        return message.content[0].text
+        logger.info("Model gave response")
+        return message.content[0].text"""
 
         return "test response"
 
