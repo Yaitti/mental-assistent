@@ -36,12 +36,12 @@ def open_config(path):
 		logger.info(f'{path} exists')
 		if path.endswith('.yaml'):
 			with open(path, "r", encoding="utf-8") as f:
-				config = yaml.load(f, Loader=yaml.BaseLoader)
+				config = yaml.safe_load(f)
 				logger.info(f'{path} was correctly opened')
 				return config
 		elif path.endswith(".json"):
 			with open(path, "r", encoding="utf-8") as f:
-				config = json.load(path)
+				config = json.load(f)
 				logger.info(f'{path} was correctly opened')
 				return config
 		else:

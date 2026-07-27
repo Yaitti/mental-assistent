@@ -40,8 +40,9 @@ class MemorableModel:
                     dialogue = json.load(f)
                     logger.info("Dialogue successfully opened")
                     return dialogue
-            except:
-                logger.error("Incorrect dialogue file")
+            except(json.JSONDecodeError, OSError):
+                logger.error("Failed to parse dialogue, starting fresh")
+                return []
         else:
             logger.info("Dialogue doesn't exist or Incorrect path")
             return []
@@ -62,7 +63,7 @@ class MemorableModel:
         self.messages.append(request)
 
         response = self.make_response()
-        response_dict = {"assistant": "user", "content": response}
+        response_dict = {"role": "assistant", "content": response}
         self.messages.append(response_dict)
 
         with open(self.config.dialogue_path, 'w', encoding="utf-8") as f:
