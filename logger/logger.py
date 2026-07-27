@@ -1,8 +1,11 @@
 import logging
 import sys
 
-def set_logging():
-    logger = logging.getLogger(__name__)
+
+APP_LOGGER_NAME = "MentalAssistant"
+
+def set_app_lvl_logger(logger_name=APP_LOGGER_NAME):
+    logger = logging.getLogger(logger_name)
     logger.setLevel(logging.INFO)
 
     file_handler = logging.FileHandler(f'{__name__}.log', mode="w")
@@ -15,3 +18,6 @@ def set_logging():
     logger.addHandler(console_handler)
 
     return logger
+
+def get_logger(module_name):
+    return logging.getLogger(APP_LOGGER_NAME).getChild(module_name)
