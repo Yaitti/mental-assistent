@@ -52,7 +52,7 @@ class MemoryAssistant:
 
         response = self.generate_response()
         assistant_message = {"role": "assistant", "content": response}
-        self.messages.append(response_dict)
+        self.messages.append(assistant_message)
 
         with open(self.config.dialogue_path, 'w', encoding="utf-8") as f:
             json.dump(self.messages, f, ensure_ascii=False, indent=4)

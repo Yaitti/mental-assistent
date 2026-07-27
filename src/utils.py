@@ -21,23 +21,18 @@ class ModelConfig:
 
 
 def open_config(path):
-	if os.path.exists(path):
-		log.info(f'{path} exists')
+	if not os.path.exists(path):
+		raise FileNotFoundError(f"config file not found: {path}")
+	with open(path, 'r', encoding='utf-8') as f:
 		if path.endswith('.yaml'):
-			with open(path, "r", encoding="utf-8") as f:
-				config = yaml.safe_load(f)
-				log.info(f'{path} was correctly opened')
-				return config
+			config = yaml.safe_load(f)
 		elif path.endswith(".json"):
-			with open(path, "r", encoding="utf-8") as f:
-				config = json.load(f)
-				log.info(f'{path} was correctly opened')
-				return config
+			config = json.load(f)
 		else:
-			raise ValueError
-	else:
-		raise FileNotFoundError
+			raise ValueError(f"Unsupported config format: {path}")
 
+	log.info("Loaded config from %s", path)
+	return config
 
 def load_config(path, config_type="base"):
 	if config_type == "base":
