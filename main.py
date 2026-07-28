@@ -21,19 +21,17 @@ class MemoryAssistant:
                                         config_type="model")
 
     def read_dialogue(self):
-        if os.path.exists(self.config.dialogue_path):
-            log.info("Dialogue exists")
-            try:
-                with open(self.config.dialogue_path, 'r', encoding="utf-8") as f:
-                    dialogue = json.load(f)
-                    log.info("Dialogue loaded successfully")
-                    return dialogue
-            except(json.JSONDecodeError, OSError):
-                log.error("Failed to parse dialogue, starting fresh")
-                return []
-        else:
-            log.info("Dialogue file not found, starting a new dialogue")
+        if not os.path.exists(self.config.dialogue_path):
+            log.info("No dialogue file found, starting new")
             return []
+        try:
+            with open(self.config.dialogue_path, 'r', encoding="utf-8") as f:
+                dialogue = json.load(f)
+            log.info("Loaded %d messages from dialogue file", len(dialogue))
+            return dialogue
+        except(json.JSONDecodeError, OSError):
+            log.error("Failed to parse dialogue")
+            raise
 
     def generate_response(self):
         """message = self.client.messages.create(
