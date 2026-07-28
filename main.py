@@ -6,8 +6,7 @@ import os
 
 log = logger.set_app_lvl_logger()
 
-from src import load_config
-
+from src import load_config, remember_fact
 
 class MemoryAssistant:
     def __init__(self, config_path="configs/config.yaml"):
@@ -40,9 +39,12 @@ class MemoryAssistant:
             messages=self.messages
         )
         log.info("Model returned response")
-        return message.content[0].text"""
+        return message.creontent[0].text"""
 
         return "test response"
+
+    #def tool_call(self, ):
+
 
     def dialogue_step(self, request_text: str):
         request = {"role": "user", "content": request_text}
@@ -64,10 +66,11 @@ def main():
     parser.add_argument('-r', '--request', type=str, required=True)
     args = parser.parse_args()
     request = args.request
-    session = MemoryAssistant()
+    #session = MemoryAssistant()
 
-    response = session.dialogue_step(request)
-    print(response)
+    #response = session.dialogue_step(request)
+    #print(response)
+    print(remember_fact("goool", "2222", "data/remembered_facts.json"))
 
 
 if __name__ == "__main__":
