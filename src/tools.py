@@ -28,5 +28,5 @@ def remember_fact(fact, category, save_path='data/remembered_facts.json'):
         return f'Fact: "{fact}"  successfully remembered'
     except TypeError:
         log.exception("Facts contains non-serialized data, not saved")
-        return False
+        return f'Facts contains non-serialized data, not saved {category}'
 
