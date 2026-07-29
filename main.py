@@ -1,8 +1,11 @@
+from unittest import result
+
 import anthropic
 import argparse
 import json
 import logger
 import os
+import re
 
 log = logger.set_app_lvl_logger()
 
@@ -33,24 +36,46 @@ class MemoryAssistant:
             raise
 
     def generate_response(self):
-        """message = self.client.messages.create(
+        message = self.client.messages.create(
             model=self.model_config.model,
             max_tokens=self.model_config.max_tokens,
             messages=self.messages
         )
         log.info("Model returned response")
-        return message.creontent[0].text"""
+        return message.content[0].text
 
-        return "test response"
+        #return "test response"
 
-    #def tool_call(self, ):
+    def tool_call(self, calls):
+        tools_result = {}
+        for call in calls:
+            tool_func = globals()[call["name"]]
+            log.info("Executing tool '%s'", call["name"])
+            tool_res = tool_func(**call["arguments"])
+            tools_result[call["name"]] = tool_res
+        return tools_result
 
+    def parse_tools(self, response):
+        TOOL_CALL_PATTERN = re.compile(r"<tool_call>\s*(.*?)\s*</tool_call>", re.DOTALL)
+        calls = []
+        for raw in TOOL_CALL_PATTERN.findall(response):
+            try:
+                calls.append(json.loads(raw))
+            except json.JSONDecodeError:
+                log.warning("Found a tool_call block %s with invalid json", raw)
+                continue
+        return calls
 
     def dialogue_step(self, request_text: str):
         request = {"role": "user", "content": request_text}
         self.messages.append(request)
 
         response = self.generate_response()
+        calls = self.parse_tools(response)
+        if len(calls) > 0:
+            log.info(f'Tools have found from response: {[call["name"] for call in calls]}')#проверить корректность лога
+            tools_response = self.tool_call(calls)
+
         assistant_message = {"role": "assistant", "content": response}
         self.messages.append(assistant_message)
 
@@ -66,12 +91,9 @@ def main():
     parser.add_argument('-r', '--request', type=str, required=True)
     args = parser.parse_args()
     request = args.request
-    #session = MemoryAssistant()
-
-    #response = session.dialogue_step(request)
-    #print(response)
-    print(remember_fact("goool", "2222", "data/remembered_facts.json"))
-
+    session = MemoryAssistant()
+    response = session.dialogue_step(request)
+    print(response)
 
 if __name__ == "__main__":
     main()
