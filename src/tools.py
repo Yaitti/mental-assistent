@@ -7,10 +7,9 @@ log = logger.get_logger(__name__)
 
 
 def remember_fact(fact, category, save_path='data/remembered_facts.json'):
-    fact = {category: fact}
     if not os.path.exists(save_path):
         log.info("No remembered facts file found, starting fresh: %s", save_path)
-        facts = {category:fact}
+        facts = {category: fact}
         with open(save_path, 'w', encoding='utf-8') as f:
             json.dump(facts, f, ensure_ascii=False, indent=4)
         return True
@@ -20,7 +19,7 @@ def remember_fact(fact, category, save_path='data/remembered_facts.json'):
                 facts = json.load(f)
                 log.info("Loaded facts from: %s", save_path)
         except(json.JSONDecodeError, OSError):
-            facts = []
+            facts = {}
             log.exception("Failed to parse remembered facts, starting new")
 
 
