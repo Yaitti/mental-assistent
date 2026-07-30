@@ -1,4 +1,6 @@
 import json
+import sys
+
 import logger
 import os
 import yaml
@@ -13,6 +15,7 @@ class BaseConfig:
 	base_url: str
 	dialogue_path: str
 	model_config_path: str
+	system_prompt_path: str
 
 @dataclass
 class ModelConfig:
@@ -39,5 +42,16 @@ def load_config(path, config_type="base"):
 		return BaseConfig(**open_config(path))
 	if config_type == "model":
 		return ModelConfig(**open_config(path))
+
+
+def load_system_prompt(path):
+	if not os.path.exists(path):
+		log.error("System prompt not found %s", path)
+		sys.exit()
+
+	with open(path, "r", encoding="utf-8") as f:
+		sys_prompt = f.read()
+		log.info("Loaded system prompt %s", path)
+		return sys_prompt
 
 

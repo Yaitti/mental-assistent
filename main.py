@@ -1,5 +1,3 @@
-from unittest import result
-
 import anthropic
 import argparse
 import json
@@ -9,7 +7,7 @@ import re
 
 log = logger.set_app_lvl_logger()
 
-from src import load_config, remember_fact
+from src import load_config, remember_fact, load_system_prompt
 
 class MemoryAssistant:
     def __init__(self, config_path="configs/config.yaml"):
@@ -21,6 +19,7 @@ class MemoryAssistant:
         )
         self.model_config = load_config(self.config.model_config_path,
                                         config_type="model")
+        self.sys_prompt = load_system_prompt(self.config.system_prompt_path)
 
     def read_dialogue(self):
         if not os.path.exists(self.config.dialogue_path):
@@ -39,6 +38,7 @@ class MemoryAssistant:
         message = self.client.messages.create(
             model=self.model_config.model,
             max_tokens=self.model_config.max_tokens,
+            system=self.sys_prompt,
             messages=self.messages
         )
         log.info("Model returned response")
