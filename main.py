@@ -44,7 +44,7 @@ class MemoryAssistant:
         log.info("Model returned response")
         return message.content[0].text
 
-        #return "test response"
+        #return 'и ты не один с этим.\n<tool_call>\n{"name": "remember_fact", "arguments": {"fact": "У пользователя СДВГ (синдром дефицита внимания и гиперактивности)", "category": "диагноз"}}\n</tool_call>'
 
     def tool_call(self, calls):
         tools_result = {}
@@ -62,19 +62,32 @@ class MemoryAssistant:
             try:
                 calls.append(json.loads(raw))
             except json.JSONDecodeError:
-                log.warning("Found a tool_call block %s with invalid json", raw)
+                log.warning("Failed to conver fact into json: %r", raw)
                 continue
         return calls
 
     def dialogue_step(self, request_text: str):
+        final_response = []
         request = {"role": "user", "content": request_text}
         self.messages.append(request)
 
         response = self.generate_response()
+        final_response.append(response)
+
         calls = self.parse_tools(response)
-        if len(calls) > 0:
-            log.info(f'Tools have found from response: {[call["name"] for call in calls]}')#проверить корректность лога
+        while calls:
+            log.info(f'Found tools from response: {[call["name"] for call in calls]}')
             tools_response = self.tool_call(calls)
+
+            assistant_message = {"role": "assistant", "content": response}
+            tool_message = {"role": "user", "content": f'<tool_result>: {str(tools_response)}'}
+            self.messages.extend([assistant_message, tool_message])
+
+            response = self.generate_response()
+            final_response.append(response)
+            calls = self.parse_tools(response)
+
+            return '\n'.join(final_response)
 
         assistant_message = {"role": "assistant", "content": response}
         self.messages.append(assistant_message)
