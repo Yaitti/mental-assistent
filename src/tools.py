@@ -1,4 +1,5 @@
 import json
+import re
 import logger
 import os
 
@@ -30,3 +31,15 @@ def remember_fact(fact, category, save_path='data/remembered_facts.json'):
 
     log.info("Remembered file in category %r", category)
     return f'Remembered: "{fact}"'
+
+
+def parse_tools(response):
+    TOOL_CALL_PATTERN = re.compile(r"<tool_call>\s*(.*?)\s*</tool_call>", re.DOTALL)
+    calls = []
+    for raw in TOOL_CALL_PATTERN.findall(response):
+        try:
+            calls.append(json.loads(raw))
+        except json.JSONDecodeError:
+            log.warning("Failed to conver fact into json: %r", raw)
+            continue
+    return calls

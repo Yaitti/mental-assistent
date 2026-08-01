@@ -7,7 +7,7 @@ import re
 
 log = logger.set_app_lvl_logger()
 
-from src import load_config, remember_fact, load_system_prompt
+from src import load_config, remember_fact, load_system_prompt, parse_tools
 
 class MemoryAssistant:
     def __init__(self, config_path="configs/config.yaml"):
@@ -55,17 +55,6 @@ class MemoryAssistant:
             tools_result[call["name"]] = tool_res
         return tools_result
 
-    def parse_tools(self, response):
-        TOOL_CALL_PATTERN = re.compile(r"<tool_call>\s*(.*?)\s*</tool_call>", re.DOTALL)
-        calls = []
-        for raw in TOOL_CALL_PATTERN.findall(response):
-            try:
-                calls.append(json.loads(raw))
-            except json.JSONDecodeError:
-                log.warning("Failed to conver fact into json: %r", raw)
-                continue
-        return calls
-
     def dialogue_step(self, request_text: str):
         final_response = []
         request = {"role": "user", "content": request_text}
@@ -74,7 +63,7 @@ class MemoryAssistant:
         response = self.generate_response()
         final_response.append(response)
 
-        calls = self.parse_tools(response)
+        calls = parse_tools(response)
         while calls:
             log.info(f'Found tools from response: {[call["name"] for call in calls]}')
             tools_response = self.tool_call(calls)
@@ -85,8 +74,8 @@ class MemoryAssistant:
 
             response = self.generate_response()
             final_response.append(response)
-            calls = self.parse_tools(response)
-
+            calls = parse_tools(response)
+        
             return '\n'.join(final_response)
 
         assistant_message = {"role": "assistant", "content": response}
